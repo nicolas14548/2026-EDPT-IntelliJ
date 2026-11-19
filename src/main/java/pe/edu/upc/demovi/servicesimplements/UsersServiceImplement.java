@@ -45,4 +45,9 @@ public class UsersServiceImplement implements IUsersService {
     public List<Object[]> contarPorRol() {
         return r.contarUsuariosPorRol();
     }
+
+    @Override
+    public Optional<Users> findByEmail(String email) {
+        return r.findByEmail(email);
+    }
 }

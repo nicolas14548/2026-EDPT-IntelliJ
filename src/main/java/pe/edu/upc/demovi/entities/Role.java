@@ -23,6 +23,14 @@ public class Role {
     @Column(name = "actualizado_en_rol")
     private LocalDateTime actualizadoEnRol;
 
+    @ManyToOne
+    @JoinColumn(name = "creado_por")
+    private Users creadoPor;
+
+    @ManyToOne
+    @JoinColumn(name = "actualizado_por")
+    private Users actualizadoPor;
+
     public Role() {
     }
 
@@ -64,5 +72,21 @@ public class Role {
 
     public void setActualizadoEnRol(LocalDateTime actualizadoEnRol) {
         this.actualizadoEnRol = actualizadoEnRol;
+    }
+
+    public Users getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Users creadoPor) {
+        this.creadoPor = creadoPor;
+    }
+
+    public Users getActualizadoPor() {
+        return actualizadoPor;
+    }
+
+    public void setActualizadoPor(Users actualizadoPor) {
+        this.actualizadoPor = actualizadoPor;
     }
 }

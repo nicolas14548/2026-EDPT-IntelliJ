@@ -12,4 +12,5 @@ public interface IUsersService {
     public void delete(Long id);
     public void update(Users users);
     public List<Object[]> contarPorRol();
+    public Optional<Users> findByEmail(String email);
 }

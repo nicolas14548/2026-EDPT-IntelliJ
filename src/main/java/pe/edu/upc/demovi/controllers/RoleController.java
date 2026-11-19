@@ -3,12 +3,15 @@ package pe.edu.upc.demovi.controllers;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.edu.upc.demovi.dtos.RoleDTO;
 import pe.edu.upc.demovi.entities.Role;
+import pe.edu.upc.demovi.entities.Users;
 import pe.edu.upc.demovi.exceptions.ResourceNotFoundException;
 import pe.edu.upc.demovi.servicesinterfaces.IRoleService;
+import pe.edu.upc.demovi.servicesinterfaces.IUsersService;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -18,10 +21,12 @@ import java.util.List;
 @RequestMapping("/api/roles")
 public class RoleController {
     private final IRoleService rS;
+    private final IUsersService uS;
     private final ModelMapper modelMapper;
 
-    public RoleController(IRoleService rS, ModelMapper modelMapper) {
+    public RoleController(IRoleService rS, IUsersService uS, ModelMapper modelMapper) {
         this.rS = rS;
+        this.uS = uS;
         this.modelMapper = modelMapper;
     }
 
@@ -35,11 +40,16 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<RoleDTO> registrar(@Valid @RequestBody RoleDTO dto) {
+    public ResponseEntity<RoleDTO> registrar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+
         Role role = modelMapper.map(dto, Role.class);
         role.setId(null);
         role.setFechaCreacionRol(LocalDateTime.now());
         role.setActualizadoEnRol(null);
+        role.setCreadoPor(usuario);
+        role.setActualizadoPor(null);
         rS.insert(role);
 
         RoleDTO responseDTO = modelMapper.map(role, RoleDTO.class);
@@ -68,7 +78,10 @@ public class RoleController {
     }
 
     @PutMapping
-    public ResponseEntity<RoleDTO> actualizar(@Valid @RequestBody RoleDTO dto) {
+    public ResponseEntity<RoleDTO> actualizar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+
         Role existente = rS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -79,6 +92,8 @@ public class RoleController {
         role.setId(existente.getId());
         role.setFechaCreacionRol(existente.getFechaCreacionRol());
         role.setActualizadoEnRol(LocalDateTime.now());
+        role.setCreadoPor(existente.getCreadoPor());
+        role.setActualizadoPor(usuario);
         rS.update(role);
 
         RoleDTO responseDTO = modelMapper.map(role, RoleDTO.class);
