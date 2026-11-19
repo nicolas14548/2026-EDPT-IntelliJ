@@ -14,6 +14,7 @@ import pe.edu.upc.demovi.servicesinterfaces.IEvaluacionService;
 import pe.edu.upc.demovi.servicesinterfaces.IUsersService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -48,6 +49,7 @@ public class EvaluacionController {
                 );
         Evaluacion evaluacion = modelMapper.map(dto, Evaluacion.class);
         evaluacion.setId(null);
+        evaluacion.setFechaFin("FINALIZADA".equals(evaluacion.getEstado()) ? LocalDateTime.now() : null);
         evaluacion.setEstudiante(estudiante);
         eS.insert(evaluacion);
 
@@ -92,6 +94,7 @@ public class EvaluacionController {
                 );
         Evaluacion evaluacion = modelMapper.map(dto, Evaluacion.class);
         evaluacion.setId(existente.getId());
+        evaluacion.setFechaFin("FINALIZADA".equals(evaluacion.getEstado()) ? LocalDateTime.now() : null);
         evaluacion.setEstudiante(estudiante);
         eS.update(evaluacion);
 

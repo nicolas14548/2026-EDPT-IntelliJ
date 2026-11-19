@@ -1,6 +1,8 @@
 package pe.edu.upc.demovi.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +22,7 @@ public class Ejercicio {
     @Column(name = "enunciado", columnDefinition = "text", nullable = false)
     private String enunciado;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "contenido_json", columnDefinition = "jsonb")
     private String contenidoJson;
 

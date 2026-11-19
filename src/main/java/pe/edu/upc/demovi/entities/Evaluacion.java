@@ -1,6 +1,8 @@
 package pe.edu.upc.demovi.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -33,6 +35,7 @@ public class Evaluacion {
     @Column(name = "puntaje")
     private Integer puntaje;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "respuestas", columnDefinition = "jsonb")
     private String respuestas;
 
