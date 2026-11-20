@@ -3,6 +3,8 @@ package pe.edu.upc.demovi.controllers;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.edu.upc.demovi.dtos.CantidadEvaluacionesDTO;
@@ -40,7 +42,7 @@ public class EvaluacionController {
     }
 
     @PostMapping
-    public ResponseEntity<EvaluacionDTO> registrar(@Valid @RequestBody EvaluacionDTO dto) {
+    public ResponseEntity<EvaluacionDTO> registrar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
         Users estudiante = uS.listId(dto.getIdEstudiante())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -49,6 +51,10 @@ public class EvaluacionController {
                 );
         Evaluacion evaluacion = modelMapper.map(dto, Evaluacion.class);
         evaluacion.setId(null);
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        evaluacion.setCreadoPor(usuario);
+        evaluacion.setActualizadoPor(null);
         evaluacion.setFechaFin("FINALIZADA".equals(evaluacion.getEstado()) ? LocalDateTime.now() : null);
         evaluacion.setEstudiante(estudiante);
         eS.insert(evaluacion);
@@ -79,7 +85,7 @@ public class EvaluacionController {
     }
 
     @PutMapping
-    public ResponseEntity<EvaluacionDTO> actualizar(@Valid @RequestBody EvaluacionDTO dto) {
+    public ResponseEntity<EvaluacionDTO> actualizar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
         Evaluacion existente = eS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -94,6 +100,10 @@ public class EvaluacionController {
                 );
         Evaluacion evaluacion = modelMapper.map(dto, Evaluacion.class);
         evaluacion.setId(existente.getId());
+        evaluacion.setCreadoPor(existente.getCreadoPor());
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        evaluacion.setActualizadoPor(usuario);
         evaluacion.setFechaFin("FINALIZADA".equals(evaluacion.getEstado()) ? LocalDateTime.now() : null);
         evaluacion.setEstudiante(estudiante);
         eS.update(evaluacion);
@@ -102,6 +112,7 @@ public class EvaluacionController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         Evaluacion evaluacion = eS.listId(id)

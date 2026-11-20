@@ -19,6 +19,7 @@ public class EjercicioDTOInsert {
     @NotNull(message = "Debe indicar si el ejercicio fue generado por IA")
     private Boolean generadoPorIa;
     private Long idCreadoPor;
+    private Long idActualizadoPor;
     @NotBlank(message = "El estado es obligatorio")
     private String estado;
 
@@ -101,4 +102,13 @@ public class EjercicioDTOInsert {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
+    public Long getIdActualizadoPor() {
+        return idActualizadoPor;
+    }
+
+    public void setIdActualizadoPor(Long idActualizadoPor) {
+        this.idActualizadoPor = idActualizadoPor;
+    }
+
 }

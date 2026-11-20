@@ -3,6 +3,8 @@ package pe.edu.upc.demovi.controllers;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -44,7 +46,7 @@ public class UsersController {
     }
 
     @PostMapping
-    public ResponseEntity<UsersDTO> registrar(@Valid @RequestBody UsersDTOInsert dto) {
+    public ResponseEntity<UsersDTO> registrar(@Valid @RequestBody UsersDTOInsert dto, Authentication auth) {
         Role rol = rS.listId(dto.getIdRol())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -72,6 +74,10 @@ public class UsersController {
 
         Users users = modelMapper.map(dto, Users.class);
         users.setId(null);
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        users.setCreadoPor(usuario);
+        users.setActualizadoPor(null);
         users.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         users.setRol(rol);
         users.setApoderado(apoderado);
@@ -106,7 +112,7 @@ public class UsersController {
     }
 
     @PutMapping
-    public ResponseEntity<UsersDTO> actualizar(@Valid @RequestBody UsersDTOInsert dto) {
+    public ResponseEntity<UsersDTO> actualizar(@Valid @RequestBody UsersDTOInsert dto, Authentication auth) {
         Users existente = uS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -140,6 +146,10 @@ public class UsersController {
 
         Users users = modelMapper.map(dto, Users.class);
         users.setId(existente.getId());
+        users.setCreadoPor(existente.getCreadoPor());
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        users.setActualizadoPor(usuario);
         users.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         users.setRol(rol);
         users.setApoderado(apoderado);
@@ -152,6 +162,7 @@ public class UsersController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         Users users = uS.listId(id)

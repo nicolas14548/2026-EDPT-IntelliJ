@@ -39,6 +39,14 @@ public class Evaluacion {
     @Column(name = "respuestas", columnDefinition = "jsonb")
     private String respuestas;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por")
+    private Users creadoPor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actualizado_por")
+    private Users actualizadoPor;
+
     public Evaluacion() {
     }
 
@@ -113,4 +121,21 @@ public class Evaluacion {
     public void setRespuestas(String respuestas) {
         this.respuestas = respuestas;
     }
+
+    public Users getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Users creadoPor) {
+        this.creadoPor = creadoPor;
+    }
+
+    public Users getActualizadoPor() {
+        return actualizadoPor;
+    }
+
+    public void setActualizadoPor(Users actualizadoPor) {
+        this.actualizadoPor = actualizadoPor;
+    }
+
 }

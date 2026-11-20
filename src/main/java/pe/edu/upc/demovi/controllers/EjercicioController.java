@@ -3,6 +3,8 @@ package pe.edu.upc.demovi.controllers;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.edu.upc.demovi.dtos.EjercicioDTO;
@@ -40,21 +42,16 @@ public class EjercicioController {
     }
 
     @PostMapping
-    public ResponseEntity<EjercicioDTOInsert> registrar(@Valid @RequestBody EjercicioDTOInsert dto) {
-        Users creador = null;
-        if (dto.getIdCreadoPor() != null) {
-            creador = uS.listId(dto.getIdCreadoPor())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "No existe el usuario creador con el id: " + dto.getIdCreadoPor()
-                            )
-                    );
-        }
+    public ResponseEntity<EjercicioDTOInsert> registrar(@Valid @RequestBody EjercicioDTOInsert dto, Authentication auth) {
+
         Ejercicio ejercicio = modelMapper.map(dto, Ejercicio.class);
         ejercicio.setId(null);
-        ejercicio.setCreadoPor(creador);
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        ejercicio.setCreadoPor(usuario);
         ejercicio.setCreatedAt(LocalDateTime.now());
         ejercicio.setUpdatedAt(null);
+        ejercicio.setActualizadoPor(null);
         eS.insert(ejercicio);
 
         EjercicioDTOInsert responseDTO = modelMapper.map(ejercicio, EjercicioDTOInsert.class);
@@ -83,33 +80,29 @@ public class EjercicioController {
     }
 
     @PutMapping
-    public ResponseEntity<EjercicioDTOInsert> actualizar(@Valid @RequestBody EjercicioDTOInsert dto) {
+    public ResponseEntity<EjercicioDTOInsert> actualizar(@Valid @RequestBody EjercicioDTOInsert dto, Authentication auth) {
+
         Ejercicio existente = eS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "No existe un ejercicio con el id: " + dto.getId()
                         )
                 );
-        Users creador = null;
-        if (dto.getIdCreadoPor() != null) {
-            creador = uS.listId(dto.getIdCreadoPor())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "No existe el usuario creador con el id: " + dto.getIdCreadoPor()
-                            )
-                    );
-        }
         Ejercicio ejercicio = modelMapper.map(dto, Ejercicio.class);
         ejercicio.setId(existente.getId());
-        ejercicio.setCreadoPor(creador);
+        ejercicio.setCreadoPor(existente.getCreadoPor());
         ejercicio.setCreatedAt(existente.getCreatedAt());
         ejercicio.setUpdatedAt(LocalDateTime.now());
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        ejercicio.setActualizadoPor(usuario);
         eS.update(ejercicio);
 
         EjercicioDTOInsert responseDTO = modelMapper.map(ejercicio, EjercicioDTOInsert.class);
         return ResponseEntity.ok(responseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         Ejercicio ejercicio = eS.listId(id)

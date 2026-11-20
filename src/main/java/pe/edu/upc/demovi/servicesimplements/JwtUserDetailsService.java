@@ -41,7 +41,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
                 .authorities(authorities)
-                .disabled(!"ACTIVO".equals(user.getEstado()))
+                .disabled(!Boolean.TRUE.equals(user.getEnabled()))
                 .build();
     }
 }

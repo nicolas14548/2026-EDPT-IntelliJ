@@ -3,6 +3,7 @@ package pe.edu.upc.demovi.controllers;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -41,13 +42,13 @@ public class RoleController {
 
     @PostMapping
     public ResponseEntity<RoleDTO> registrar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
-        Users usuario = uS.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
 
         Role role = modelMapper.map(dto, Role.class);
         role.setId(null);
         role.setFechaCreacionRol(LocalDateTime.now());
         role.setActualizadoEnRol(null);
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
         role.setCreadoPor(usuario);
         role.setActualizadoPor(null);
         rS.insert(role);
@@ -79,8 +80,6 @@ public class RoleController {
 
     @PutMapping
     public ResponseEntity<RoleDTO> actualizar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
-        Users usuario = uS.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
 
         Role existente = rS.listId(dto.getId())
                 .orElseThrow(() ->
@@ -93,6 +92,8 @@ public class RoleController {
         role.setFechaCreacionRol(existente.getFechaCreacionRol());
         role.setActualizadoEnRol(LocalDateTime.now());
         role.setCreadoPor(existente.getCreadoPor());
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
         role.setActualizadoPor(usuario);
         rS.update(role);
 
@@ -100,6 +101,7 @@ public class RoleController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         Role role = rS.listId(id)

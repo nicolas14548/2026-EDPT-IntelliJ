@@ -16,7 +16,7 @@ public interface IEvaluacionRepository extends JpaRepository<Evaluacion, Long> {
             " on r.id=u.rol_id\n" +
             " left join evaluaciones e\n" +
             " on e.estudiante_id=u.id\n" +
-            " where r.nombre_rol='ESTUDIANTE'\n" +
+            " where r.nombre_rol='ROLE_ESTUDIANTE'\n" +
             " group by u.id, u.nombre", nativeQuery = true)
     List<Object[]> contarEvaluacionesPorEstudiante();
 }

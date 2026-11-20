@@ -116,27 +116,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/roles/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/roles").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/roles").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/roles/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/usuarios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/usuarios").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/ejercicios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/ejercicios/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/ejercicios").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/ejercicios").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/ejercicios/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/evaluaciones").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/evaluaciones/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/evaluaciones").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/evaluaciones").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/evaluaciones/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

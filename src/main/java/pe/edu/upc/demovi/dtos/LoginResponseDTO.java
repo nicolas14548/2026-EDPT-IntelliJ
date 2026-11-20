@@ -1,13 +1,18 @@
 package pe.edu.upc.demovi.dtos;
 
+import java.util.List;
+
 public class LoginResponseDTO {
     private String token;
 
     private String username;
 
-    public LoginResponseDTO(String token, String username) {
+    private List<String> roles;
+
+    public LoginResponseDTO(String token, String username, List<String> roles) {
         this.token = token;
         this.username = username;
+        this.roles = roles;
     }
 
     public String getToken() {
@@ -16,5 +21,9 @@ public class LoginResponseDTO {
 
     public String getUsername() {
         return username;
+    }
+
+    public List<String> getRoles() {
+        return roles;
     }
 }

@@ -35,9 +35,13 @@ public class Ejercicio {
     @Column(name = "generado_por_ia", nullable = false)
     private Boolean generadoPorIa;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creado_por")
     private Users creadoPor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actualizado_por")
+    private Users actualizadoPor;
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
@@ -129,6 +133,14 @@ public class Ejercicio {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Users getActualizadoPor() {
+        return actualizadoPor;
+    }
+
+    public void setActualizadoPor(Users actualizadoPor) {
+        this.actualizadoPor = actualizadoPor;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -12,9 +12,11 @@ public class UsersDTO {
     private Long idDocente;
     private Short grado;
     private String seccion;
-    private String estado;
+    private Boolean enabled;
     private LocalDateTime fechaRegistro;
     private LocalDateTime updatedAt;
+    private Long idCreadoPor;
+    private Long idActualizadoPor;
 
     public Long getId() {
         return id;
@@ -88,12 +90,12 @@ public class UsersDTO {
         this.seccion = seccion;
     }
 
-    public String getEstado() {
-        return estado;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public LocalDateTime getFechaRegistro() {
@@ -111,4 +113,21 @@ public class UsersDTO {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public Long getIdCreadoPor() {
+        return idCreadoPor;
+    }
+
+    public void setIdCreadoPor(Long idCreadoPor) {
+        this.idCreadoPor = idCreadoPor;
+    }
+
+    public Long getIdActualizadoPor() {
+        return idActualizadoPor;
+    }
+
+    public void setIdActualizadoPor(Long idActualizadoPor) {
+        this.idActualizadoPor = idActualizadoPor;
+    }
+
 }

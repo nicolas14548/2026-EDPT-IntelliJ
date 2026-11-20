@@ -19,8 +19,9 @@ public class UsersDTOInsert {
     private Long idDocente;
     private Short grado;
     private String seccion;
-    @NotBlank(message = "El estado es obligatorio")
-    private String estado;
+    private Boolean enabled = true;
+    private Long idCreadoPor;
+    private Long idActualizadoPor;
 
     public Long getId() {
         return id;
@@ -102,11 +103,28 @@ public class UsersDTOInsert {
         this.seccion = seccion;
     }
 
-    public String getEstado() {
-        return estado;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
+
+    public Long getIdCreadoPor() {
+        return idCreadoPor;
+    }
+
+    public void setIdCreadoPor(Long idCreadoPor) {
+        this.idCreadoPor = idCreadoPor;
+    }
+
+    public Long getIdActualizadoPor() {
+        return idActualizadoPor;
+    }
+
+    public void setIdActualizadoPor(Long idActualizadoPor) {
+        this.idActualizadoPor = idActualizadoPor;
+    }
+
 }

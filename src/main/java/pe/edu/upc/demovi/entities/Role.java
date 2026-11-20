@@ -23,11 +23,11 @@ public class Role {
     @Column(name = "actualizado_en_rol")
     private LocalDateTime actualizadoEnRol;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creado_por")
     private Users creadoPor;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actualizado_por")
     private Users actualizadoPor;
 

@@ -20,6 +20,8 @@ public class EvaluacionDTO {
     private LocalDateTime fechaFin;
     private Integer puntaje;
     private String respuestas;
+    private Long idCreadoPor;
+    private Long idActualizadoPor;
 
     public Long getId() {
         return id;
@@ -92,4 +94,21 @@ public class EvaluacionDTO {
     public void setRespuestas(String respuestas) {
         this.respuestas = respuestas;
     }
+
+    public Long getIdCreadoPor() {
+        return idCreadoPor;
+    }
+
+    public void setIdCreadoPor(Long idCreadoPor) {
+        this.idCreadoPor = idCreadoPor;
+    }
+
+    public Long getIdActualizadoPor() {
+        return idActualizadoPor;
+    }
+
+    public void setIdActualizadoPor(Long idActualizadoPor) {
+        this.idActualizadoPor = idActualizadoPor;
+    }
+
 }

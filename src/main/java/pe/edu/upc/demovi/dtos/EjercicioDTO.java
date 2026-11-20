@@ -14,6 +14,7 @@ public class EjercicioDTO {
     private String estado;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long idActualizadoPor;
 
     public Long getId() {
         return id;
@@ -101,5 +102,13 @@ public class EjercicioDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getIdActualizadoPor() {
+        return idActualizadoPor;
+    }
+
+    public void setIdActualizadoPor(Long idActualizadoPor) {
+        this.idActualizadoPor = idActualizadoPor;
     }
 }

@@ -49,7 +49,8 @@ public class LoginController {
         return ResponseEntity.ok(
                 new LoginResponseDTO(
                         token,
-                        userDetails.getUsername()
+                        userDetails.getUsername(),
+                        userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList()
                 )
         );
     }

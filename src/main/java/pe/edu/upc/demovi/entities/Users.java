@@ -41,14 +41,22 @@ public class Users {
     @Column(name = "seccion", length = 5)
     private String seccion;
 
-    @Column(name = "estado", length = 20, nullable = false)
-    private String estado;
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = true;
 
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creado_por")
+    private Users creadoPor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actualizado_por")
+    private Users actualizadoPor;
 
     public Users() {
     }
@@ -133,12 +141,12 @@ public class Users {
         this.seccion = seccion;
     }
 
-    public String getEstado() {
-        return estado;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public LocalDateTime getFechaRegistro() {
@@ -156,4 +164,21 @@ public class Users {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public Users getCreadoPor() {
+        return creadoPor;
+    }
+
+    public void setCreadoPor(Users creadoPor) {
+        this.creadoPor = creadoPor;
+    }
+
+    public Users getActualizadoPor() {
+        return actualizadoPor;
+    }
+
+    public void setActualizadoPor(Users actualizadoPor) {
+        this.actualizadoPor = actualizadoPor;
+    }
+
 }
