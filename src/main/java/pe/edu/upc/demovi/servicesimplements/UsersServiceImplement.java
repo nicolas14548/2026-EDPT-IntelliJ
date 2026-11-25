@@ -50,4 +50,9 @@ public class UsersServiceImplement implements IUsersService {
     public Optional<Users> findByEmail(String email) {
         return r.findByEmail(email);
     }
+
+    @Override
+    public List<Users> obtenerEstudiantesPorApoderado(Long idApoderado) {
+        return r.findEstudiantesActivosPorApoderado(idApoderado);
+    }
 }

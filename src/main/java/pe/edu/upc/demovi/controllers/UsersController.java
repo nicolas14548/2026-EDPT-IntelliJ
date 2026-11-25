@@ -36,6 +36,7 @@ public class UsersController {
         this.modelMapper = modelMapper;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @GetMapping
     public ResponseEntity<List<UsersDTO>> listar() {
         List<UsersDTO> lista = uS.list()
@@ -45,6 +46,7 @@ public class UsersController {
         return ResponseEntity.ok(lista);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UsersDTO> registrar(@Valid @RequestBody UsersDTOInsert dto, Authentication auth) {
         Role rol = rS.listId(dto.getIdRol())
@@ -99,6 +101,7 @@ public class UsersController {
                 .body(responseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UsersDTO> buscarPorId(@PathVariable Long id) {
         Users users = uS.listId(id)
@@ -111,6 +114,15 @@ public class UsersController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ResponseEntity<UsersDTO> buscarUsuarioAutenticado(Authentication auth) {
+        Users usuario = uS.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+        return ResponseEntity.ok(modelMapper.map(usuario, UsersDTO.class));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<UsersDTO> actualizar(@Valid @RequestBody UsersDTOInsert dto, Authentication auth) {
         Users existente = uS.listId(dto.getId())
@@ -175,6 +187,7 @@ public class UsersController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/cantidades")
     public ResponseEntity<List<CantidadRolDTO>> contarPorRol() {
         List<CantidadRolDTO> lista = uS.contarPorRol()

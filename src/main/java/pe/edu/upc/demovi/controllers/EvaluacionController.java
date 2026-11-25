@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,6 +19,7 @@ import pe.edu.upc.demovi.servicesinterfaces.IUsersService;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/evaluaciones")
@@ -32,6 +34,7 @@ public class EvaluacionController {
         this.modelMapper = modelMapper;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @GetMapping
     public ResponseEntity<List<EvaluacionDTO>> listar() {
         List<EvaluacionDTO> lista = eS.list()
@@ -41,8 +44,10 @@ public class EvaluacionController {
         return ResponseEntity.ok(lista);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'ESTUDIANTE')")
     @PostMapping
     public ResponseEntity<EvaluacionDTO> registrar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
+        validarPropiedadDeEstudiante(dto.getIdEstudiante(), auth);
         Users estudiante = uS.listId(dto.getIdEstudiante())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -72,6 +77,7 @@ public class EvaluacionController {
                 .body(responseDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<EvaluacionDTO> buscarPorId(@PathVariable Long id) {
         Evaluacion evaluacion = eS.listId(id)
@@ -84,6 +90,7 @@ public class EvaluacionController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @PutMapping
     public ResponseEntity<EvaluacionDTO> actualizar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
         Evaluacion existente = eS.listId(dto.getId())
@@ -125,8 +132,12 @@ public class EvaluacionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'ESTUDIANTE')")
     @GetMapping("/estudiante/{idEstudiante}")
-    public ResponseEntity<List<EvaluacionDTO>> historialPorEstudiante(@PathVariable Long idEstudiante) {
+    public ResponseEntity<List<EvaluacionDTO>> historialPorEstudiante(
+            @PathVariable Long idEstudiante, Authentication authentication) {
+        validarPropiedadDeEstudiante(idEstudiante, authentication);
+
         List<EvaluacionDTO> lista = eS.obtenerPorEstudiante(idEstudiante)
                 .stream()
                 .map(evaluacion -> modelMapper.map(evaluacion, EvaluacionDTO.class))
@@ -134,6 +145,7 @@ public class EvaluacionController {
         return ResponseEntity.ok(lista);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @GetMapping("/cantidades")
     public ResponseEntity<List<CantidadEvaluacionesDTO>> contarPorEstudiante() {
         List<CantidadEvaluacionesDTO> lista = eS.contarPorEstudiante()
@@ -146,5 +158,21 @@ public class EvaluacionController {
                 })
                 .toList();
         return ResponseEntity.ok(lista);
+    }
+
+    private void validarPropiedadDeEstudiante(Long idEstudiante, Authentication authentication) {
+        boolean esAdministradorODocente = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN")
+                        || authority.getAuthority().equals("ROLE_DOCENTE"));
+        if (esAdministradorODocente) {
+            return;
+        }
+
+        Users estudianteAutenticado = uS.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No existe el usuario: " + authentication.getName()));
+        if (!Objects.equals(estudianteAutenticado.getId(), idEstudiante)) {
+            throw new AccessDeniedException("Solo puede consultar sus propias evaluaciones");
+        }
     }
 }

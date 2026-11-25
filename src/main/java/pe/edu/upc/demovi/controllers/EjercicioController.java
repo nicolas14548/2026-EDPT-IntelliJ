@@ -32,6 +32,7 @@ public class EjercicioController {
         this.modelMapper = modelMapper;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'ESTUDIANTE')")
     @GetMapping
     public ResponseEntity<List<EjercicioDTO>> listar() {
         List<EjercicioDTO> lista = eS.list()
@@ -41,6 +42,7 @@ public class EjercicioController {
         return ResponseEntity.ok(lista);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @PostMapping
     public ResponseEntity<EjercicioDTOInsert> registrar(@Valid @RequestBody EjercicioDTOInsert dto, Authentication auth) {
 
@@ -67,6 +69,7 @@ public class EjercicioController {
                 .body(responseDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<EjercicioDTOInsert> buscarPorId(@PathVariable Long id) {
         Ejercicio ejercicio = eS.listId(id)
@@ -79,6 +82,7 @@ public class EjercicioController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @PutMapping
     public ResponseEntity<EjercicioDTOInsert> actualizar(@Valid @RequestBody EjercicioDTOInsert dto, Authentication auth) {
 
@@ -115,6 +119,7 @@ public class EjercicioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'ESTUDIANTE')")
     @GetMapping("/materias")
     public ResponseEntity<List<EjercicioDTO>> buscarPorMateria(@RequestParam String materia) {
         List<EjercicioDTO> lista = eS.obtenerPorMateria(materia)

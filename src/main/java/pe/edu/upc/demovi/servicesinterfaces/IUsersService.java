@@ -13,4 +13,5 @@ public interface IUsersService {
     public void update(Users users);
     public List<Object[]> contarPorRol();
     public Optional<Users> findByEmail(String email);
+    public List<Users> obtenerEstudiantesPorApoderado(Long idApoderado);
 }
