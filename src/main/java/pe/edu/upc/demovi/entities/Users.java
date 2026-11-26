@@ -3,6 +3,8 @@ package pe.edu.upc.demovi.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
@@ -23,9 +25,13 @@ public class Users {
     @Column(name = "password_hash", length = 200, nullable = false)
     private String passwordHash;
 
-    @ManyToOne
-    @JoinColumn(name = "rol_id", nullable = false)
-    private Role rol;
+    @OneToMany(
+            mappedBy = "user",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Role> roles = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "apoderado_id")
@@ -101,12 +107,12 @@ public class Users {
         this.passwordHash = passwordHash;
     }
 
-    public Role getRol() {
-        return rol;
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public void setRol(Role rol) {
-        this.rol = rol;
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     public Users getApoderado() {

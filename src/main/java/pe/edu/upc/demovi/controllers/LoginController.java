@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upc.demovi.dtos.LoginRequestDTO;
 import pe.edu.upc.demovi.dtos.LoginResponseDTO;
+import pe.edu.upc.demovi.entities.Users;
+import pe.edu.upc.demovi.exceptions.ResourceNotFoundException;
 import pe.edu.upc.demovi.securities.JwtTokenService;
+import pe.edu.upc.demovi.servicesinterfaces.IUsersService;
 
 @RestController
 @RequestMapping("/login")
@@ -20,12 +23,16 @@ public class LoginController {
 
     private final JwtTokenService jwtTokenService;
 
+    private final IUsersService uS;
+
     public LoginController(
             AuthenticationManager authenticationManager,
-            JwtTokenService jwtTokenService) {
+            JwtTokenService jwtTokenService,
+            IUsersService uS) {
 
         this.authenticationManager = authenticationManager;
         this.jwtTokenService = jwtTokenService;
+        this.uS = uS;
     }
 
     @PostMapping
@@ -46,11 +53,19 @@ public class LoginController {
         String token =
                 jwtTokenService.generateToken(userDetails);
 
+        Users usuario = uS.findByEmail(userDetails.getUsername())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "No existe el usuario: " + userDetails.getUsername()
+                        )
+                );
+
         return ResponseEntity.ok(
                 new LoginResponseDTO(
                         token,
                         userDetails.getUsername(),
-                        userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList()
+                        userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList(),
+                        usuario.getId()
                 )
         );
     }

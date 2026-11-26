@@ -2,17 +2,28 @@ package pe.edu.upc.demovi.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "roles")
-public class Role {
+@Table(
+        name = "roles",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "rol"})
+        }
+)
+public class Role implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre_rol", length = 30, nullable = false, unique = true)
-    private String nombreRol;
+    @Column(nullable = false, length = 30)
+    private String rol;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
     @Column(name = "descripcion_rol", length = 200)
     private String descripcionRol;
@@ -42,12 +53,20 @@ public class Role {
         this.id = id;
     }
 
-    public String getNombreRol() {
-        return nombreRol;
+    public String getRol() {
+        return rol;
     }
 
-    public void setNombreRol(String nombreRol) {
-        this.nombreRol = nombreRol;
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 
     public String getDescripcionRol() {

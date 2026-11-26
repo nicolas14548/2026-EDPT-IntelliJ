@@ -1,13 +1,16 @@
 package pe.edu.upc.demovi.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 public class RoleDTO {
     private Long id;
-    @NotBlank(message = "El nombre del rol es obligatorio")
-    private String nombreRol;
+    @NotBlank(message = "El rol es obligatorio")
+    private String rol;
+    @NotNull(message = "El id del usuario es obligatorio")
+    private Long idUser;
     private String descripcionRol;
     private LocalDateTime fechaCreacionRol;
     private LocalDateTime actualizadoEnRol;
@@ -22,12 +25,20 @@ public class RoleDTO {
         this.id = id;
     }
 
-    public String getNombreRol() {
-        return nombreRol;
+    public String getRol() {
+        return rol;
     }
 
-    public void setNombreRol(String nombreRol) {
-        this.nombreRol = nombreRol;
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public Long getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(Long idUser) {
+        this.idUser = idUser;
     }
 
     public String getDescripcionRol() {

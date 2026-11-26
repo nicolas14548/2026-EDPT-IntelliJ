@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pe.edu.upc.demovi.dtos.CantidadEvaluacionesDTO;
 import pe.edu.upc.demovi.dtos.EvaluacionDTO;
+import pe.edu.upc.demovi.dtos.EvaluacionDTOInsert;
 import pe.edu.upc.demovi.entities.Evaluacion;
 import pe.edu.upc.demovi.entities.Users;
 import pe.edu.upc.demovi.exceptions.ResourceNotFoundException;
@@ -46,7 +47,7 @@ public class EvaluacionController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE', 'ESTUDIANTE')")
     @PostMapping
-    public ResponseEntity<EvaluacionDTO> registrar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
+    public ResponseEntity<EvaluacionDTO> registrar(@Valid @RequestBody EvaluacionDTOInsert dto, Authentication auth) {
         validarPropiedadDeEstudiante(dto.getIdEstudiante(), auth);
         Users estudiante = uS.listId(dto.getIdEstudiante())
                 .orElseThrow(() ->
@@ -92,7 +93,7 @@ public class EvaluacionController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DOCENTE')")
     @PutMapping
-    public ResponseEntity<EvaluacionDTO> actualizar(@Valid @RequestBody EvaluacionDTO dto, Authentication auth) {
+    public ResponseEntity<EvaluacionDTO> actualizar(@Valid @RequestBody EvaluacionDTOInsert dto, Authentication auth) {
         Evaluacion existente = eS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

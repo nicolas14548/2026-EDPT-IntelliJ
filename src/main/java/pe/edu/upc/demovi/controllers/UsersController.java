@@ -14,24 +14,22 @@ import pe.edu.upc.demovi.dtos.UsersDTOInsert;
 import pe.edu.upc.demovi.entities.Role;
 import pe.edu.upc.demovi.entities.Users;
 import pe.edu.upc.demovi.exceptions.ResourceNotFoundException;
-import pe.edu.upc.demovi.servicesinterfaces.IRoleService;
 import pe.edu.upc.demovi.servicesinterfaces.IUsersService;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsersController {
     private final IUsersService uS;
-    private final IRoleService rS;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
-    public UsersController(IUsersService uS, IRoleService rS, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    public UsersController(IUsersService uS, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.uS = uS;
-        this.rS = rS;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
     }
@@ -41,7 +39,7 @@ public class UsersController {
     public ResponseEntity<List<UsersDTO>> listar() {
         List<UsersDTO> lista = uS.list()
                 .stream()
-                .map(users -> modelMapper.map(users, UsersDTO.class))
+                .map(users -> aDTO(users))
                 .toList();
         return ResponseEntity.ok(lista);
     }
@@ -49,12 +47,6 @@ public class UsersController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UsersDTO> registrar(@Valid @RequestBody UsersDTOInsert dto, Authentication auth) {
-        Role rol = rS.listId(dto.getIdRol())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "No existe el rol con el id: " + dto.getIdRol()
-                        )
-                );
         Users apoderado = null;
         if (dto.getIdApoderado() != null) {
             apoderado = uS.listId(dto.getIdApoderado())
@@ -81,14 +73,19 @@ public class UsersController {
         users.setCreadoPor(usuario);
         users.setActualizadoPor(null);
         users.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        users.setRol(rol);
+        Role rol = new Role();
+        rol.setRol(dto.getRol());
+        rol.setUser(users);
+        rol.setFechaCreacionRol(LocalDateTime.now());
+        rol.setCreadoPor(usuario);
+        users.setRoles(new ArrayList<>(List.of(rol)));
         users.setApoderado(apoderado);
         users.setDocente(docente);
         users.setFechaRegistro(LocalDateTime.now());
         users.setUpdatedAt(null);
         uS.insert(users);
 
-        UsersDTO responseDTO = modelMapper.map(users, UsersDTO.class);
+        UsersDTO responseDTO = aDTO(users);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -110,7 +107,7 @@ public class UsersController {
                                 "No existe un usuario con el id: " + id
                         )
                 );
-        UsersDTO dto = modelMapper.map(users, UsersDTO.class);
+        UsersDTO dto = aDTO(users);
         return ResponseEntity.ok(dto);
     }
 
@@ -119,7 +116,7 @@ public class UsersController {
     public ResponseEntity<UsersDTO> buscarUsuarioAutenticado(Authentication auth) {
         Users usuario = uS.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
-        return ResponseEntity.ok(modelMapper.map(usuario, UsersDTO.class));
+        return ResponseEntity.ok(aDTO(usuario));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -129,12 +126,6 @@ public class UsersController {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "No existe un usuario con el id: " + dto.getId()
-                        )
-                );
-        Role rol = rS.listId(dto.getIdRol())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "No existe el rol con el id: " + dto.getIdRol()
                         )
                 );
         Users apoderado = null;
@@ -163,14 +154,26 @@ public class UsersController {
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
         users.setActualizadoPor(usuario);
         users.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        users.setRol(rol);
+        Role rol = existente.getRoles()
+                .stream()
+                .filter(r -> r.getRol().equals(dto.getRol()))
+                .findFirst()
+                .orElseGet(() -> {
+                    Role nuevo = new Role();
+                    nuevo.setRol(dto.getRol());
+                    nuevo.setFechaCreacionRol(LocalDateTime.now());
+                    nuevo.setCreadoPor(usuario);
+                    return nuevo;
+                });
+        rol.setUser(users);
+        users.setRoles(new ArrayList<>(List.of(rol)));
         users.setApoderado(apoderado);
         users.setDocente(docente);
         users.setFechaRegistro(existente.getFechaRegistro());
         users.setUpdatedAt(LocalDateTime.now());
         uS.update(users);
 
-        UsersDTO responseDTO = modelMapper.map(users, UsersDTO.class);
+        UsersDTO responseDTO = aDTO(users);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -200,5 +203,11 @@ public class UsersController {
                 })
                 .toList();
         return ResponseEntity.ok(lista);
+    }
+
+    private UsersDTO aDTO(Users users) {
+        UsersDTO dto = modelMapper.map(users, UsersDTO.class);
+        dto.setRol(users.getRoles().isEmpty() ? null : users.getRoles().get(0).getRol());
+        return dto;
     }
 }

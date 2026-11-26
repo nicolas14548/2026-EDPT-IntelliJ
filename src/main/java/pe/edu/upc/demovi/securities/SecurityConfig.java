@@ -114,27 +114,6 @@ public class SecurityConfig {
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/roles/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/cantidades").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyRole("ADMIN", "DOCENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/*").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/apoderados/progreso").hasRole("APODERADO")
-
-                        .requestMatchers(HttpMethod.GET, "/api/ejercicios", "/api/ejercicios/materias")
-                        .hasAnyRole("ADMIN", "DOCENTE", "ESTUDIANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/ejercicios/*")
-                        .hasAnyRole("ADMIN", "DOCENTE")
-
-                        .requestMatchers(HttpMethod.GET, "/api/evaluaciones/cantidades")
-                        .hasAnyRole("ADMIN", "DOCENTE")
-                        .requestMatchers(HttpMethod.GET, "/api/evaluaciones/estudiante/**")
-                        .hasAnyRole("ADMIN", "DOCENTE", "ESTUDIANTE")
-                        .requestMatchers(HttpMethod.GET, "/api/evaluaciones", "/api/evaluaciones/*")
-                        .hasAnyRole("ADMIN", "DOCENTE")
-
                         .anyRequest().authenticated()
                 )
 

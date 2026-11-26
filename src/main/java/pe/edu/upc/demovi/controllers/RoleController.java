@@ -1,7 +1,6 @@
 package pe.edu.upc.demovi.controllers;
 
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,39 +21,47 @@ import java.util.List;
 @RequestMapping("/api/roles")
 @PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
+
     private final IRoleService rS;
     private final IUsersService uS;
-    private final ModelMapper modelMapper;
 
-    public RoleController(IRoleService rS, IUsersService uS, ModelMapper modelMapper) {
+    public RoleController(IRoleService rS, IUsersService uS) {
         this.rS = rS;
         this.uS = uS;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping
     public ResponseEntity<List<RoleDTO>> listar() {
         List<RoleDTO> lista = rS.list()
                 .stream()
-                .map(role -> modelMapper.map(role, RoleDTO.class))
+                .map(role -> aDTO(role))
                 .toList();
+
         return ResponseEntity.ok(lista);
     }
 
     @PostMapping
     public ResponseEntity<RoleDTO> registrar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
+        Users user = uS.listId(dto.getIdUser())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "No existe el usuario con el id: " + dto.getIdUser()
+                        )
+                );
 
-        Role role = modelMapper.map(dto, Role.class);
-        role.setId(null);
-        role.setFechaCreacionRol(LocalDateTime.now());
-        role.setActualizadoEnRol(null);
         Users usuario = uS.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+
+        Role role = new Role();
+        role.setRol(dto.getRol());
+        role.setUser(user);
+        role.setDescripcionRol(dto.getDescripcionRol());
+        role.setFechaCreacionRol(LocalDateTime.now());
+        role.setActualizadoEnRol(null);
         role.setCreadoPor(usuario);
         role.setActualizadoPor(null);
-        rS.insert(role);
 
-        RoleDTO responseDTO = modelMapper.map(role, RoleDTO.class);
+        rS.insert(role);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -64,7 +71,7 @@ public class RoleController {
 
         return ResponseEntity
                 .created(location)
-                .body(responseDTO);
+                .body(aDTO(role));
     }
 
     @GetMapping("/{id}")
@@ -75,34 +82,40 @@ public class RoleController {
                                 "No existe un rol con el id: " + id
                         )
                 );
-        RoleDTO dto = modelMapper.map(role, RoleDTO.class);
-        return ResponseEntity.ok(dto);
+
+        return ResponseEntity.ok(aDTO(role));
     }
 
     @PutMapping
     public ResponseEntity<RoleDTO> actualizar(@Valid @RequestBody RoleDTO dto, Authentication auth) {
-
-        Role existente = rS.listId(dto.getId())
+        Role role = rS.listId(dto.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "No existe un rol con el id: " + dto.getId()
                         )
                 );
-        Role role = modelMapper.map(dto, Role.class);
-        role.setId(existente.getId());
-        role.setFechaCreacionRol(existente.getFechaCreacionRol());
-        role.setActualizadoEnRol(LocalDateTime.now());
-        role.setCreadoPor(existente.getCreadoPor());
+
+        Users user = uS.listId(dto.getIdUser())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "No existe el usuario con el id: " + dto.getIdUser()
+                        )
+                );
+
         Users usuario = uS.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario: " + auth.getName()));
+
+        role.setRol(dto.getRol());
+        role.setUser(user);
+        role.setDescripcionRol(dto.getDescripcionRol());
+        role.setActualizadoEnRol(LocalDateTime.now());
         role.setActualizadoPor(usuario);
+
         rS.update(role);
 
-        RoleDTO responseDTO = modelMapper.map(role, RoleDTO.class);
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.ok(aDTO(role));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         Role role = rS.listId(id)
@@ -111,7 +124,22 @@ public class RoleController {
                                 "No existe un rol con el id: " + id
                         )
                 );
+
         rS.delete(role.getId());
+
         return ResponseEntity.noContent().build();
+    }
+
+    private RoleDTO aDTO(Role role) {
+        RoleDTO dto = new RoleDTO();
+        dto.setId(role.getId());
+        dto.setRol(role.getRol());
+        dto.setIdUser(role.getUser().getId());
+        dto.setDescripcionRol(role.getDescripcionRol());
+        dto.setFechaCreacionRol(role.getFechaCreacionRol());
+        dto.setActualizadoEnRol(role.getActualizadoEnRol());
+        dto.setIdCreadoPor(role.getCreadoPor() != null ? role.getCreadoPor().getId() : null);
+        dto.setIdActualizadoPor(role.getActualizadoPor() != null ? role.getActualizadoPor().getId() : null);
+        return dto;
     }
 }

@@ -33,11 +33,11 @@ public class JwtUserDetailsService implements UserDetailsService {
                         )
                 );
 
-        String role = user.getRol().getNombreRol();
-        String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-        List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(authority)
-        );
+        List<GrantedAuthority> authorities = user.getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRol()))
+                .map(authority -> (GrantedAuthority) authority)
+                .toList();
 
         return User.builder()
                 .username(user.getEmail())

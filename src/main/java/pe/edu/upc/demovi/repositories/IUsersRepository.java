@@ -14,17 +14,16 @@ public interface IUsersRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
 
     @Query("""
-            select u from Users u
+            select distinct u from Users u join u.roles r
             where u.apoderado.id = :idApoderado
               and u.enabled = true
-              and u.rol.nombreRol in ('ESTUDIANTE', 'ROLE_ESTUDIANTE')
+              and r.rol = 'ROLE_ESTUDIANTE'
             order by u.nombre asc
             """)
     List<Users> findEstudiantesActivosPorApoderado(@Param("idApoderado") Long idApoderado);
 
-    @Query(value = "select r.nombre_rol, count(u.id)\n" +
-            " from roles r left join usuarios u\n" +
-            " on u.rol_id=r.id\n" +
-            " group by r.id, r.nombre_rol", nativeQuery = true)
+    @Query(value = "select r.rol, count(r.user_id)\n" +
+            " from roles r\n" +
+            " group by r.rol", nativeQuery = true)
     List<Object[]> contarUsuariosPorRol();
 }

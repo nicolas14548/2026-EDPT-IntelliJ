@@ -13,8 +13,8 @@ public class UsersDTOInsert {
     private String email;
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
-    @NotNull(message = "El id del rol es obligatorio")
-    private Long idRol;
+    @NotBlank(message = "El rol es obligatorio")
+    private String rol;
     private Long idApoderado;
     private Long idDocente;
     private Short grado;
@@ -63,12 +63,12 @@ public class UsersDTOInsert {
         this.password = password;
     }
 
-    public Long getIdRol() {
-        return idRol;
+    public String getRol() {
+        return rol;
     }
 
-    public void setIdRol(Long idRol) {
-        this.idRol = idRol;
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 
     public Long getIdApoderado() {

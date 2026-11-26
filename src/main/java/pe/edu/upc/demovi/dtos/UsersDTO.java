@@ -7,7 +7,7 @@ public class UsersDTO {
     private String nombre;
     private String apellido;
     private String email;
-    private Long idRol;
+    private String rol;
     private Long idApoderado;
     private Long idDocente;
     private Short grado;
@@ -50,12 +50,12 @@ public class UsersDTO {
         this.email = email;
     }
 
-    public Long getIdRol() {
-        return idRol;
+    public String getRol() {
+        return rol;
     }
 
-    public void setIdRol(Long idRol) {
-        this.idRol = idRol;
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 
     public Long getIdApoderado() {
